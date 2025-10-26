@@ -18,91 +18,19 @@
             color: #fff;
             overflow: hidden;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header Controls */
-        #header {
-            background: #1a1a1a;
-            padding: 15px 20px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            border-bottom: 2px solid #333;
-            z-index: 100;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        button {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #444;
-        }
-
-        button:active {
-            background: #555;
-        }
-
-        button.active {
-            background: #0066cc;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .file-label {
-            background: #333;
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-
-        .file-label:hover {
-            background: #444;
-        }
-
-        input[type="range"] {
-            width: 120px;
-        }
-
-        label {
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        .value-display {
-            min-width: 60px;
-            text-align: center;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        /* Text Viewport */
-        #viewport {
-            flex: 1;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
             position: relative;
+        }
+
+        /* Text Viewport - Full screen with space for controls at bottom */
+        #viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 60px; /* Space for controls */
+            overflow: hidden;
             background: #000;
         }
 
@@ -127,47 +55,107 @@
             background: rgba(255, 255, 0, 0.2);
         }
 
-        /* Footer Controls */
-        #footer {
-            background: #1a1a1a;
-            padding: 15px 20px;
+        /* Bottom Controls - Fixed at bottom, minimal and compact */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
             display: flex;
-            gap: 15px;
+            gap: 8px;
             align-items: center;
             justify-content: space-between;
-            border-top: 2px solid #333;
+            border-top: 1px solid #333;
             z-index: 100;
+            flex-wrap: wrap;
         }
 
-        .playback-controls {
+        .control-group {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             align-items: center;
+        }
+
+        button {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        button:active {
+            background: #555;
+        }
+
+        button.active {
+            background: #0066cc;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            background: #333;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: inline-block;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .file-label:hover {
+            background: #444;
+        }
+
+        input[type="range"] {
+            width: 70px;
+            height: 20px;
+        }
+
+        label {
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .value-display {
+            min-width: 45px;
+            text-align: center;
+            font-size: 10px;
+            color: #fff;
         }
 
         .nav-button {
-            font-size: 20px;
-            padding: 8px 16px;
+            font-size: 14px;
+            padding: 4px 10px;
         }
 
         .play-pause {
-            font-size: 24px;
-            padding: 10px 20px;
-        }
-
-        .progress-container {
-            flex: 1;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            max-width: 600px;
+            font-size: 16px;
+            padding: 4px 12px;
         }
 
         #progress-bar {
             flex: 1;
-            height: 8px;
+            min-width: 100px;
+            height: 6px;
             background: #333;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
             position: relative;
         }
@@ -175,15 +163,15 @@
         #progress-fill {
             height: 100%;
             background: #0066cc;
-            border-radius: 4px;
+            border-radius: 3px;
             width: 0%;
             transition: width 0.1s linear;
         }
 
         #progress-percent {
-            min-width: 45px;
+            min-width: 35px;
             text-align: right;
-            font-weight: bold;
+            font-size: 10px;
         }
 
         /* Paste Modal */
@@ -234,28 +222,49 @@
         }
 
         /* Fullscreen styles */
-        #app.fullscreen #header,
-        #app.fullscreen #footer {
+        #app.fullscreen #controls {
             display: none;
+        }
+
+        #app.fullscreen #viewport {
+            bottom: 0;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            #header {
-                font-size: 12px;
+            #controls {
+                padding: 6px 8px;
+                gap: 6px;
+            }
+
+            .control-group {
+                gap: 4px;
             }
 
             button, .file-label {
-                padding: 6px 12px;
-                font-size: 12px;
+                padding: 3px 8px;
+                font-size: 10px;
             }
 
             input[type="range"] {
-                width: 80px;
+                width: 60px;
+            }
+
+            .value-display {
+                min-width: 40px;
+                font-size: 9px;
+            }
+
+            label {
+                font-size: 9px;
             }
 
             #text-container {
                 padding: 20px;
+            }
+
+            #viewport {
+                bottom: 50px;
             }
         }
 
@@ -268,35 +277,6 @@
 </head>
 <body>
     <div id="app">
-        <!-- Header Controls -->
-        <div id="header">
-            <div class="control-group">
-                <label for="file-upload" class="file-label">📁 Upload</label>
-                <input type="file" id="file-upload" accept=".txt,.docx,.md">
-                <button id="paste-btn">📝 Paste</button>
-            </div>
-
-            <div class="control-group">
-                <button id="mirror-btn">⟷ Mirror</button>
-            </div>
-
-            <div class="control-group">
-                <label>Font:</label>
-                <input type="range" id="font-slider" min="24" max="96" value="48" step="4">
-                <span class="value-display" id="font-value">48px</span>
-            </div>
-
-            <div class="control-group">
-                <label>Speed:</label>
-                <input type="range" id="speed-slider" min="60" max="300" value="180" step="10">
-                <span class="value-display" id="speed-value">180 WPM</span>
-            </div>
-
-            <div class="control-group">
-                <button id="fullscreen-btn">⛶ Fullscreen</button>
-            </div>
-        </div>
-
         <!-- Text Viewport -->
         <div id="viewport">
             <div id="text-container">
@@ -306,19 +286,40 @@
             </div>
         </div>
 
-        <!-- Footer Controls -->
-        <div id="footer">
-            <div class="playback-controls">
+        <!-- Bottom Controls - All controls consolidated -->
+        <div id="controls">
+            <!-- Playback Controls -->
+            <div class="control-group">
                 <button id="prev-btn" class="nav-button">◄</button>
                 <button id="play-pause-btn" class="play-pause">▶</button>
                 <button id="next-btn" class="nav-button">►</button>
             </div>
 
-            <div class="progress-container">
-                <div id="progress-bar">
-                    <div id="progress-fill"></div>
-                </div>
-                <span id="progress-percent">0%</span>
+            <!-- Progress Bar -->
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <span id="progress-percent">0%</span>
+
+            <!-- Speed Control -->
+            <div class="control-group">
+                <input type="range" id="speed-slider" min="60" max="300" value="180" step="10">
+                <span class="value-display" id="speed-value">180</span>
+            </div>
+
+            <!-- Font Size Control -->
+            <div class="control-group">
+                <input type="range" id="font-slider" min="24" max="96" value="48" step="4">
+                <span class="value-display" id="font-value">48</span>
+            </div>
+
+            <!-- File/Paste Controls -->
+            <div class="control-group">
+                <label for="file-upload" class="file-label">📁</label>
+                <input type="file" id="file-upload" accept=".txt,.docx,.md">
+                <button id="paste-btn">📝</button>
+                <button id="mirror-btn">⟷</button>
+                <button id="fullscreen-btn">⛶</button>
             </div>
         </div>
 
@@ -382,9 +383,9 @@
             state.mirror = localStorage.getItem('prompter_mirror') === 'true';
 
             elements.speedSlider.value = state.speed;
-            elements.speedValue.textContent = state.speed + ' WPM';
+            elements.speedValue.textContent = state.speed;
             elements.fontSlider.value = state.fontSize;
-            elements.fontValue.textContent = state.fontSize + 'px';
+            elements.fontValue.textContent = state.fontSize;
             elements.textContainer.style.fontSize = state.fontSize + 'px';
 
             if (state.mirror) {
@@ -642,14 +643,14 @@
         elements.fontSlider.addEventListener('input', (e) => {
             state.fontSize = parseInt(e.target.value);
             saveSetting('prompter_fontSize', state.fontSize);
-            elements.fontValue.textContent = state.fontSize + 'px';
+            elements.fontValue.textContent = state.fontSize;
             elements.textContainer.style.fontSize = state.fontSize + 'px';
         });
 
         elements.speedSlider.addEventListener('input', (e) => {
             state.speed = parseInt(e.target.value);
             saveSetting('prompter_speed', state.speed);
-            elements.speedValue.textContent = state.speed + ' WPM';
+            elements.speedValue.textContent = state.speed;
         });
 
         elements.fullscreenBtn.addEventListener('click', toggleFullscreen);
@@ -687,14 +688,14 @@
                     e.preventDefault();
                     state.speed = Math.min(300, state.speed + 10);
                     elements.speedSlider.value = state.speed;
-                    elements.speedValue.textContent = state.speed + ' WPM';
+                    elements.speedValue.textContent = state.speed;
                     saveSetting('prompter_speed', state.speed);
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
                     state.speed = Math.max(60, state.speed - 10);
                     elements.speedSlider.value = state.speed;
-                    elements.speedValue.textContent = state.speed + ' WPM';
+                    elements.speedValue.textContent = state.speed;
                     saveSetting('prompter_speed', state.speed);
                     break;
                 case 'ArrowLeft':
