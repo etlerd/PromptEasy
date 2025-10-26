@@ -462,9 +462,18 @@
             state.text = text;
             state.sentences = parseSentences(text);
             state.currentSentenceIndex = 0;
-            state.scrollPosition = 0;
 
+            // Position text at bottom of viewport initially
+            // We'll set this after the text is rendered
             displayText();
+
+            // Wait for DOM to update, then set initial position
+            setTimeout(() => {
+                const viewportHeight = elements.viewport.clientHeight;
+                state.scrollPosition = viewportHeight - 100; // Start with first line visible at bottom
+                displayText();
+            }, 0);
+
             updateProgress();
             stopPlayback();
         }
@@ -536,7 +545,8 @@
             const pixelsPerChar = state.fontSize * 0.6; // Approximate character width
             const scrollSpeed = wordsPerMs * avgCharsPerWord * pixelsPerChar;
 
-            state.scrollPosition += scrollSpeed * deltaTime;
+            // Scroll UP (decrease position) to reveal text from below
+            state.scrollPosition -= scrollSpeed * deltaTime;
 
             // Update display
             if (state.mirror) {
@@ -546,8 +556,13 @@
             }
 
             // Calculate progress
-            const maxScroll = elements.textContainer.scrollHeight - elements.viewport.clientHeight;
-            const progress = Math.min(100, Math.max(0, (Math.abs(state.scrollPosition) / maxScroll) * 100));
+            const viewportHeight = elements.viewport.clientHeight;
+            const totalHeight = elements.textContainer.scrollHeight;
+            const startPosition = viewportHeight - 100;
+            const endPosition = -(totalHeight - viewportHeight);
+            const scrollRange = startPosition - endPosition;
+            const scrolled = startPosition - state.scrollPosition;
+            const progress = Math.min(100, Math.max(0, (scrolled / scrollRange) * 100));
             updateProgressBar(progress);
 
             // Check if we've scrolled past current sentence
@@ -558,12 +573,17 @@
         }
 
         function updateCurrentSentence() {
-            // Simple implementation: estimate based on scroll position
+            // Estimate based on scroll position
+            const viewportHeight = elements.viewport.clientHeight;
             const totalHeight = elements.textContainer.scrollHeight;
-            const scrolledHeight = Math.abs(state.scrollPosition);
-            const estimatedIndex = Math.floor((scrolledHeight / totalHeight) * state.sentences.length);
+            const startPosition = viewportHeight - 100;
+            const endPosition = -(totalHeight - viewportHeight);
+            const scrollRange = startPosition - endPosition;
+            const scrolled = startPosition - state.scrollPosition;
+            const progress = scrolled / scrollRange;
+            const estimatedIndex = Math.floor(progress * state.sentences.length);
 
-            if (estimatedIndex !== state.currentSentenceIndex && estimatedIndex < state.sentences.length) {
+            if (estimatedIndex !== state.currentSentenceIndex && estimatedIndex >= 0 && estimatedIndex < state.sentences.length) {
                 state.currentSentenceIndex = estimatedIndex;
                 displayText();
             }
@@ -587,10 +607,14 @@
         function jumpToSentence(index) {
             state.currentSentenceIndex = index;
 
-            // Calculate approximate scroll position for this sentence
+            // Calculate scroll position for this sentence
+            const viewportHeight = elements.viewport.clientHeight;
             const totalHeight = elements.textContainer.scrollHeight;
-            const sentenceRatio = index / state.sentences.length;
-            state.scrollPosition = -(sentenceRatio * totalHeight);
+            const startPosition = viewportHeight - 100;
+            const endPosition = -(totalHeight - viewportHeight);
+            const scrollRange = startPosition - endPosition;
+            const sentenceProgress = index / state.sentences.length;
+            state.scrollPosition = startPosition - (sentenceProgress * scrollRange);
 
             displayText();
             updateProgress();
