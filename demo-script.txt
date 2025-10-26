@@ -1,0 +1,25 @@
+Welcome to the Web Teleprompter Demo Script
+
+Hello and welcome to this demonstration of the web teleprompter application. This tool is designed specifically for solo content creators who need a reliable and easy-to-use teleprompter solution.
+
+In this demo, we'll explore the key features that make this teleprompter perfect for your video production needs. The interface is clean and intuitive, allowing you to focus on your performance rather than technical details.
+
+One of the standout features is the adjustable reading speed. You can set your preferred words per minute anywhere from 60 to 300 WPM. This flexibility ensures that whether you're a fast talker or prefer a more measured pace, the teleprompter adapts to your style.
+
+The mirror mode is particularly useful if you're using a beam-splitter setup. With a single click, the text flips horizontally, making it readable when reflected off a piece of glass positioned in front of your camera lens.
+
+Font size adjustment is another helpful feature. Depending on your distance from the screen and your vision, you can increase or decrease the text size to ensure optimal readability. The range goes from 24 to 96 pixels, giving you plenty of options.
+
+Navigation is simple and efficient. You can jump forward or backward by sentence, making it easy to rehearse specific sections of your script. The progress bar shows you exactly where you are in your document, so you always know how much content remains.
+
+Keyboard shortcuts make operation seamless. Press the spacebar to play or pause. Use the arrow keys to adjust speed on the fly or to navigate between sentences. Press F to enter fullscreen mode and eliminate all distractions.
+
+Your settings are automatically saved to your browser's local storage. This means that when you return to use the teleprompter, your preferred speed, font size, and mirror mode settings are exactly as you left them. No need to reconfigure every time.
+
+The application works entirely in your browser with no backend server required. This means your scripts remain completely private and the app works even when you're offline. Simply load your text file or paste your script, and you're ready to go.
+
+File format support includes plain text files, markdown files, and Microsoft Word documents. The maximum file size is 5 megabytes, which is more than enough for most scripts. Upload is instant and processing is fast.
+
+Whether you're recording YouTube videos, creating online courses, filming corporate presentations, or producing any other type of video content, this teleprompter provides the essential features you need without unnecessary complexity.
+
+Thank you for trying the web teleprompter. We hope it helps you create better videos with more confidence and professionalism. Happy filming!
