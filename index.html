@@ -43,10 +43,6 @@
             transition: transform 0.05s linear;
         }
 
-        #text-container.mirrored {
-            transform: scaleX(-1);
-        }
-
         .sentence {
             display: inline;
         }
@@ -319,6 +315,7 @@
                 <input type="file" id="file-upload" accept=".txt,.docx,.md">
                 <button id="paste-btn">📝</button>
                 <button id="mirror-btn">⟷</button>
+                <button id="vflip-btn">⇅</button>
                 <button id="fullscreen-btn">⛶</button>
             </div>
         </div>
@@ -346,6 +343,7 @@
             speed: 180, // WPM
             fontSize: 48,
             mirror: false,
+            verticalFlip: false,
             scrollPosition: 0,
             animationFrameId: null,
             lastTimestamp: 0
@@ -361,6 +359,7 @@
             pasteLoad: document.getElementById('paste-load'),
             pasteCancel: document.getElementById('paste-cancel'),
             mirrorBtn: document.getElementById('mirror-btn'),
+            vflipBtn: document.getElementById('vflip-btn'),
             fontSlider: document.getElementById('font-slider'),
             fontValue: document.getElementById('font-value'),
             speedSlider: document.getElementById('speed-slider'),
@@ -381,6 +380,7 @@
             state.speed = parseInt(localStorage.getItem('prompter_speed')) || 180;
             state.fontSize = parseInt(localStorage.getItem('prompter_fontSize')) || 48;
             state.mirror = localStorage.getItem('prompter_mirror') === 'true';
+            state.verticalFlip = localStorage.getItem('prompter_verticalFlip') === 'true';
 
             elements.speedSlider.value = state.speed;
             elements.speedValue.textContent = state.speed;
@@ -389,13 +389,31 @@
             elements.textContainer.style.fontSize = state.fontSize + 'px';
 
             if (state.mirror) {
-                elements.textContainer.classList.add('mirrored');
                 elements.mirrorBtn.classList.add('active');
             }
+            if (state.verticalFlip) {
+                elements.vflipBtn.classList.add('active');
+            }
+            updateTransform();
         }
 
         function saveSetting(key, value) {
             localStorage.setItem(key, value);
+        }
+
+        // ===== Transform Helper =====
+        function updateTransform() {
+            let transform = `translateY(${state.scrollPosition}px)`;
+
+            if (state.mirror && state.verticalFlip) {
+                transform = `scaleX(-1) scaleY(-1) ${transform}`;
+            } else if (state.mirror) {
+                transform = `scaleX(-1) ${transform}`;
+            } else if (state.verticalFlip) {
+                transform = `scaleY(-1) ${transform}`;
+            }
+
+            elements.textContainer.style.transform = transform;
         }
 
         // ===== File Handling =====
@@ -497,7 +515,7 @@
             }).join('');
 
             elements.textContainer.innerHTML = html;
-            elements.textContainer.style.transform = `translateY(${state.scrollPosition}px)`;
+            updateTransform();
         }
 
         function escapeHtml(text) {
@@ -549,11 +567,7 @@
             state.scrollPosition -= scrollSpeed * deltaTime;
 
             // Update display
-            if (state.mirror) {
-                elements.textContainer.style.transform = `scaleX(-1) translateY(${state.scrollPosition}px)`;
-            } else {
-                elements.textContainer.style.transform = `translateY(${state.scrollPosition}px)`;
-            }
+            updateTransform();
 
             // Calculate progress
             const viewportHeight = elements.viewport.clientHeight;
@@ -653,15 +667,23 @@
             saveSetting('prompter_mirror', state.mirror);
 
             if (state.mirror) {
-                elements.textContainer.classList.add('mirrored');
                 elements.mirrorBtn.classList.add('active');
-                // Adjust transform to include both mirror and scroll
-                elements.textContainer.style.transform = `scaleX(-1) translateY(${state.scrollPosition}px)`;
             } else {
-                elements.textContainer.classList.remove('mirrored');
                 elements.mirrorBtn.classList.remove('active');
-                elements.textContainer.style.transform = `translateY(${state.scrollPosition}px)`;
             }
+            updateTransform();
+        });
+
+        elements.vflipBtn.addEventListener('click', () => {
+            state.verticalFlip = !state.verticalFlip;
+            saveSetting('prompter_verticalFlip', state.verticalFlip);
+
+            if (state.verticalFlip) {
+                elements.vflipBtn.classList.add('active');
+            } else {
+                elements.vflipBtn.classList.remove('active');
+            }
+            updateTransform();
         });
 
         elements.fontSlider.addEventListener('input', (e) => {
