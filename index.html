@@ -299,7 +299,7 @@
 
             <!-- Speed Control -->
             <div class="control-group">
-                <input type="range" id="speed-slider" min="60" max="300" value="180" step="10">
+                <input type="range" id="speed-slider" min="30" max="300" value="180" step="10">
                 <span class="value-display" id="speed-value">180</span>
             </div>
 
@@ -739,7 +739,7 @@
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
-                    state.speed = Math.max(60, state.speed - 10);
+                    state.speed = Math.max(30, state.speed - 10);
                     elements.speedSlider.value = state.speed;
                     elements.speedValue.textContent = state.speed;
                     saveSetting('prompter_speed', state.speed);
