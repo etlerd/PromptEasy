@@ -482,7 +482,6 @@
             state.currentSentenceIndex = 0;
 
             // Position text at bottom of viewport initially
-            // We'll set this after the text is rendered
             displayText();
 
             // Wait for DOM to update, then set initial position
@@ -491,10 +490,10 @@
                 const totalHeight = elements.textContainer.scrollHeight;
 
                 if (state.verticalFlip) {
-                    // When flipped, start from opposite end
-                    state.scrollPosition = -(totalHeight - viewportHeight) + 100;
+                    // When flipped, start at the opposite end (negative)
+                    state.scrollPosition = -(totalHeight - viewportHeight + 100);
                 } else {
-                    // Normal: Start with first line visible at bottom
+                    // Normal: start with first line visible at bottom
                     state.scrollPosition = viewportHeight - 100;
                 }
                 displayText();
@@ -565,56 +564,55 @@
             state.lastTimestamp = timestamp;
 
             // Calculate scroll distance based on WPM
-            // WPM = words per minute, convert to pixels per millisecond
             const wordsPerMs = state.speed / 60000;
-            const avgCharsPerWord = 5; // Approximate
-            const pixelsPerChar = state.fontSize * 0.6; // Approximate character width
+            const avgCharsPerWord = 5;
+            const pixelsPerChar = state.fontSize * 0.6;
             const scrollSpeed = wordsPerMs * avgCharsPerWord * pixelsPerChar;
 
             // Calculate bounds
             const viewportHeight = elements.viewport.clientHeight;
             const totalHeight = elements.textContainer.scrollHeight;
-            const startPosition = viewportHeight - 100;
-            const endPosition = -(totalHeight - viewportHeight);
 
-            // Scroll direction depends on vertical flip state
             if (state.verticalFlip) {
-                // When vertically flipped, scroll direction is reversed
+                // When flipped, scroll in opposite direction (increase = move up visually)
                 state.scrollPosition += scrollSpeed * deltaTime;
+
                 // Stop at end (positive limit when flipped)
-                if (state.scrollPosition > -endPosition) {
-                    state.scrollPosition = -endPosition;
+                const endPosition = viewportHeight - 100;
+                if (state.scrollPosition > endPosition) {
+                    state.scrollPosition = endPosition;
                     stopPlayback();
                     return;
                 }
+
+                // Calculate progress for flipped mode
+                const startPosition = -(totalHeight - viewportHeight + 100);
+                const scrollRange = endPosition - startPosition;
+                const scrolled = state.scrollPosition - startPosition;
+                const progress = Math.min(100, Math.max(0, (scrolled / scrollRange) * 100));
+                updateProgressBar(progress);
             } else {
                 // Normal: Scroll UP (decrease position) to reveal text from below
                 state.scrollPosition -= scrollSpeed * deltaTime;
-                // Stop at end (negative limit when normal)
+
+                // Stop at end (negative limit)
+                const endPosition = -(totalHeight - viewportHeight);
                 if (state.scrollPosition < endPosition) {
                     state.scrollPosition = endPosition;
                     stopPlayback();
                     return;
                 }
+
+                // Calculate progress for normal mode
+                const startPosition = viewportHeight - 100;
+                const scrollRange = startPosition - endPosition;
+                const scrolled = startPosition - state.scrollPosition;
+                const progress = Math.min(100, Math.max(0, (scrolled / scrollRange) * 100));
+                updateProgressBar(progress);
             }
 
             // Update display
             updateTransform();
-
-            // Calculate progress
-            let progress;
-            if (state.verticalFlip) {
-                const flippedStart = -(totalHeight - viewportHeight) + 100;
-                const flippedEnd = viewportHeight - 100;
-                const scrollRange = flippedEnd - flippedStart;
-                const scrolled = state.scrollPosition - flippedStart;
-                progress = Math.min(100, Math.max(0, (scrolled / scrollRange) * 100));
-            } else {
-                const scrollRange = startPosition - endPosition;
-                const scrolled = startPosition - state.scrollPosition;
-                progress = Math.min(100, Math.max(0, (scrolled / scrollRange) * 100));
-            }
-            updateProgressBar(progress);
 
             // Check if we've scrolled past current sentence
             updateCurrentSentence();
@@ -630,10 +628,10 @@
 
             let progress;
             if (state.verticalFlip) {
-                const flippedStart = -(totalHeight - viewportHeight) + 100;
-                const flippedEnd = viewportHeight - 100;
-                const scrollRange = flippedEnd - flippedStart;
-                const scrolled = state.scrollPosition - flippedStart;
+                const startPosition = -(totalHeight - viewportHeight + 100);
+                const endPosition = viewportHeight - 100;
+                const scrollRange = endPosition - startPosition;
+                const scrolled = state.scrollPosition - startPosition;
                 progress = scrolled / scrollRange;
             } else {
                 const startPosition = viewportHeight - 100;
@@ -675,10 +673,10 @@
             const sentenceProgress = index / state.sentences.length;
 
             if (state.verticalFlip) {
-                const flippedStart = -(totalHeight - viewportHeight) + 100;
-                const flippedEnd = viewportHeight - 100;
-                const scrollRange = flippedEnd - flippedStart;
-                state.scrollPosition = flippedStart + (sentenceProgress * scrollRange);
+                const startPosition = -(totalHeight - viewportHeight + 100);
+                const endPosition = viewportHeight - 100;
+                const scrollRange = endPosition - startPosition;
+                state.scrollPosition = startPosition + (sentenceProgress * scrollRange);
             } else {
                 const startPosition = viewportHeight - 100;
                 const endPosition = -(totalHeight - viewportHeight);
@@ -731,6 +729,28 @@
         });
 
         elements.vflipBtn.addEventListener('click', () => {
+            // Calculate current progress before flipping
+            let currentProgress = 0;
+            if (state.sentences.length > 0) {
+                const viewportHeight = elements.viewport.clientHeight;
+                const totalHeight = elements.textContainer.scrollHeight;
+
+                if (state.verticalFlip) {
+                    // Currently flipped, calculate progress
+                    const startPos = -(totalHeight - viewportHeight + 100);
+                    const endPos = viewportHeight - 100;
+                    const range = endPos - startPos;
+                    currentProgress = (state.scrollPosition - startPos) / range;
+                } else {
+                    // Currently normal, calculate progress
+                    const startPos = viewportHeight - 100;
+                    const endPos = -(totalHeight - viewportHeight);
+                    const range = startPos - endPos;
+                    currentProgress = (startPos - state.scrollPosition) / range;
+                }
+            }
+
+            // Toggle flip state
             state.verticalFlip = !state.verticalFlip;
             saveSetting('prompter_verticalFlip', state.verticalFlip);
 
@@ -740,26 +760,23 @@
                 elements.vflipBtn.classList.remove('active');
             }
 
-            // Recalculate position when toggling flip to maintain relative position
+            // Recalculate position to maintain progress
             if (state.sentences.length > 0) {
                 const viewportHeight = elements.viewport.clientHeight;
                 const totalHeight = elements.textContainer.scrollHeight;
-                const startPosNormal = viewportHeight - 100;
-                const startPosFlipped = -(totalHeight - viewportHeight) + 100;
-                const endPosNormal = -(totalHeight - viewportHeight);
-                const endPosFlipped = viewportHeight - 100;
 
-                // Calculate current progress through document
-                const oldRange = startPosNormal - endPosNormal;
-                const oldProgress = (startPosNormal - state.scrollPosition) / oldRange;
-
-                // Apply progress to new range
                 if (state.verticalFlip) {
-                    const newRange = endPosFlipped - startPosFlipped;
-                    state.scrollPosition = startPosFlipped + (oldProgress * newRange);
+                    // Now flipped, apply progress
+                    const startPos = -(totalHeight - viewportHeight + 100);
+                    const endPos = viewportHeight - 100;
+                    const range = endPos - startPos;
+                    state.scrollPosition = startPos + (currentProgress * range);
                 } else {
-                    const newRange = startPosNormal - endPosNormal;
-                    state.scrollPosition = startPosNormal - (oldProgress * newRange);
+                    // Now normal, apply progress
+                    const startPos = viewportHeight - 100;
+                    const endPos = -(totalHeight - viewportHeight);
+                    const range = startPos - endPos;
+                    state.scrollPosition = startPos - (currentProgress * range);
                 }
             }
 
